@@ -445,8 +445,8 @@ async function gistLoad(gid,token){
   if(r.status===404)throw new Error('Gist not found — check your Gist ID');
   if(!r.ok)throw new Error('HTTP '+r.status);
   const gist=await r.json();
-  const file=gist.files['hamr_hub.json'];
-  if(!file)throw new Error('File hamr_hub.json not found in gist — make sure you named the file exactly hamr_hub.json');
+  const file=gist.files['tricityallstars.json'];
+  if(!file)throw new Error('File tricityallstars.json not found in gist — make sure you named the file exactly tricityallstars.json');
   let data={};
   try{data=JSON.parse(file.content||'{}');}catch(e){data={};}
   const merged=Object.assign({},BLANK_DB,data);
@@ -489,7 +489,7 @@ async function gistSave(gid,token,data){
   const r=await fetch(`https://api.github.com/gists/${gid}`,{
     method:'PATCH',
     headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-    body:JSON.stringify({files:{'hamr_hub.json':{content:JSON.stringify(data)}}})
+    body:JSON.stringify({files:{'tricityallstars.json':{content:JSON.stringify(data)}}})
   });
   if(!r.ok)throw new Error('HTTP '+r.status);
 }
@@ -577,6 +577,32 @@ function importBackup(input){
 }
 
 // ═══ SETTINGS ════════════════════════════════════════════
+
+function importDrills(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const drills=JSON.parse(e.target.result);
+      if(!Array.isArray(drills))throw new Error('Invalid format');
+      const existing=new Set(DB.drills.map(d=>d.id));
+      const toAdd=drills.filter(d=>!existing.has(d.id));
+      DB.drills=[...DB.drills,...toAdd];
+      scheduleSave();renderTab();updateCounts();
+      showModal(mhdr('📥 Drills Imported')+`<div style="text-align:center;padding:20px">
+        <div style="font-size:40px;margin-bottom:12px">✅</div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:8px">${toAdd.length} new drills added!</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px">${drills.length-toAdd.length} drills were already in your library and were skipped.</div>
+        <button class="btn btn-gold" onclick="closeModal();document.querySelector('[data-tab=\'drills\']')?.click()">View Drills</button>
+        <button class="btn btn-dim" style="margin-left:8px" onclick="closeModal()">Done</button>
+      </div>`);
+    }catch(err){
+      alert('Could not read drill file: '+err.message);
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
 function showSettings(){
   showModal(`${mhdr('⚙ Settings')}
     <div class="col">
@@ -596,6 +622,7 @@ function showSettings(){
       <div class="row" style="flex-wrap:wrap;gap:8px">
         <button class="btn btn-green btn-sm" onclick="exportBackup()">💾 Backup Data</button>
         <label class="btn btn-dim btn-sm">📂 Restore Backup<input type="file" accept=".json" class="hidden" onchange="importBackup(this)"></label>
+        <label class="btn btn-blue btn-sm">📥 Import Drills<input type="file" accept=".json" class="hidden" onchange="importDrills(this)"></label>
         <button class="btn btn-red btn-sm" onclick="if(confirm('Disconnect and reload?')){localStorage.removeItem('${GIST_ID_KEY}');localStorage.removeItem('${GH_TOKEN_KEY}');location.reload();}">Disconnect</button>
       </div>
       <button class="btn btn-gold" onclick="closeModal()">Done</button>
@@ -613,7 +640,7 @@ function renderSetup(){
       <ol style="padding-left:20px;color:var(--muted);line-height:2.8">
         <li>Go to <a href="https://github.com" target="_blank" style="color:var(--gold)">github.com</a> → sign in or create a free account</li>
         <li>Go to <a href="https://gist.github.com" target="_blank" style="color:var(--gold)">gist.github.com</a></li>
-        <li>Set the filename to exactly: <span style="font-family:monospace;background:var(--navy);color:var(--green);padding:2px 8px;border-radius:4px">hamr_hub.json</span></li>
+        <li>Set the filename to exactly: <span style="font-family:monospace;background:var(--navy);color:var(--green);padding:2px 8px;border-radius:4px">tricityallstars.json</span></li>
         <li>In the content area type: <span style="font-family:monospace;background:var(--navy);color:var(--green);padding:2px 8px;border-radius:4px">{}</span></li>
         <li>Click <strong style="color:var(--text)">Create secret gist</strong></li>
         <li>Copy the <strong style="color:var(--text)">Gist ID</strong> from the URL — it's the long code at the very end of the address bar</li>
