@@ -1,11 +1,4 @@
-const SEED_PLAYERS=[
-  {name:'Luciana Bartolotta',number:'5',positions:['SS','3B','OF'],notes:''},
-  {name:'Amelia Ciarrocchi',number:'8',positions:['P','1B'],notes:''},
-  {name:'Lily Drown',number:'9',positions:['OF','SS'],notes:''},
-  {name:'Amira Hassan',number:'99',positions:['C','P'],notes:'Requests Coach Mike C'},
-  {name:'Bridget Walsh',number:'23',positions:['OF','1B'],notes:''},
-  {name:'Emily St. Rock',number:'17',positions:['P','OF'],notes:''},
-];<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -321,25 +314,7 @@ const SEED_DRILLS = [
   {id:"seed_d1e41e03b28a",name:"Bare Hand Fielding Drill",category:"Fielding",url:"https://www.youtube.com/shorts/LIQwkqXuZeY",tags:"soft hands, stay low, fielding mechanics, bare hand, ground balls, infield, partner drill, fundamentals, daily",description:"Forces players to stay low and use soft hands by removing the glove. Partners face each other at short distance.\n\nRound 1 — Bare Hand (5 reps):\n\u2022 Partner tosses a ground ball\n\u2022 Player must field it bare-handed — no glove\n\u2022 To catch it cleanly they HAVE to get low, funnel it in, and use soft hands\n\u2022 Quick toss back to partner, partner quickly tosses the next one\n\u2022 Keep the pace brisk — this is reps, not conversation\n\nRound 2 — With Glove (5 reps):\n\u2022 Same drill, same pace, but now with the glove\n\u2022 The bare-hand round trains the body — the glove round locks it in\n\u2022 Player should immediately feel the difference and naturally stay lower\n\nCoaching cue: 'If you can catch it bare-handed, you can catch anything.' The instinct to protect the bare hand forces proper mechanics without any coaching required."},
   {id:"seed_192d12e7c962",name:"Hip Turn & Separation Drill",category:"Hitting",url:"https://www.youtube.com/shorts/z8qs6ebkuR8",drillType:"Warmup",tags:"hip turn, separation, hip-to-hand sequence, load, power, bat lag, pre-swing warmup, tee work prep, feel drill",description:"A feel drill to run before tee work begins. Teaches players to feel the hips firing first and the hands following — the foundation of a powerful swing.\n\nHow to run it:\n\u2022 Player holds bat in hitting position\n\u2022 Focus: fire the hips through the zone BEFORE the hands move\n\u2022 Exaggerate the separation — hips open fully while hands stay back\n\u2022 Feel the stretch/tension between the lower and upper body\n\u2022 Do 5\u201310 slow-motion reps just feeling the sequence, then move to the tee\n\nCoaching cue: 'Hips go first. Hands are just passengers until the hips fire.' Run this for 60 seconds before any tee session to activate the correct movement pattern. If a player is casting or rolling over, often it's because her hands are leading her hips — this drill resets that."},
 ];
-const SEED_PLAYERS = [
-  {name:"Luciana Bartolotta", number:"", positions:[], notes:"6th grade. Has anxiety — does better with familiar teammates. Close with Amira Hassan and Amelia Ciarrocchi."},
-  {name:"Kendall Bryant",     number:"", positions:[], notes:"6th grade."},
-  {name:"Harper Carroll",     number:"", positions:[], notes:"4th grade."},
-  {name:"Amelia Ciarrocchi",  number:"", positions:[], notes:"6th grade."},
-  {name:"Avery Colantonio",   number:"", positions:[], notes:"6th grade."},
-  {name:"Ruby Day",           number:"", positions:[], notes:"6th grade. Asthma — be aware."},
-  {name:"Lily Drown",         number:"", positions:[], notes:"7th grade."},
-  {name:"Isabella Erba",      number:"", positions:[], notes:"6th grade."},
-  {name:"Aria Fuss",          number:"", positions:[], notes:"7th grade."},
-  {name:"Callie Guyette",     number:"", positions:[], notes:"5th grade."},
-  {name:"Evaleen Hart",       number:"", positions:[], notes:"7th grade."},
-  {name:"Amira Hassan",       number:"", positions:[], notes:"6th grade. Requests Coach Mike C as mentor — has worked with him for years."},
-  {name:"Kendra Jackson",     number:"", positions:[], notes:"5th grade."},
-  {name:"Megan Seipt",        number:"", positions:[], notes:"6th grade."},
-  {name:"Emily St. Rock",     number:"", positions:[], notes:"7th grade."},
-  {name:"Sawyer Thompson",    number:"", positions:[], notes:"7th grade."},
-  {name:"Bridget Walsh",      number:"", positions:[], notes:"6th grade."},
-];
+
 const METRIC_TYPES = [
   { key:"run60",       label:"60yd Dash",       unit:"sec", lowerBetter:true  },
   { key:"homeToFirst", label:"Home → 1st",       unit:"sec", lowerBetter:true  },
@@ -369,6 +344,14 @@ const CAT_COLOR={Hitting:'#f0a500',Pitching:'#5b8af5',Fielding:'#3ddc84',Catchin
 const GIST_ID_KEY='sh_gist_id';
 const GH_TOKEN_KEY='sh_gh_token';
 const SEED_GAMES=[];
+const SEED_PLAYERS=[
+  {name:'Luciana Bartolotta',number:'5',positions:['SS','3B','OF'],notes:''},
+  {name:'Amelia Ciarrocchi',number:'8',positions:['P','1B'],notes:''},
+  {name:'Lily Drown',number:'9',positions:['OF','SS'],notes:''},
+  {name:'Amira Hassan',number:'99',positions:['C','P'],notes:'Requests Coach Mike C'},
+  {name:'Bridget Walsh',number:'23',positions:['OF','1B'],notes:''},
+  {name:'Emily St. Rock',number:'17',positions:['P','OF'],notes:''},
+];
 const BLANK_DB={players:[],drills:[],plans:[],metrics:[],games:[],gcStats:[],playerSkills:[],jokes:[]};
 
 // ═══ STATE ══════════════════════════════════════════════
