@@ -1110,7 +1110,9 @@ function showPlanEditor(isNew){
         ondrop="onDrop(event,'${item.id}',false)">
         <div class="row" style="margin-bottom:8px;gap:6px">
           <span class="drag-handle" title="Drag to reorder">⠿</span>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--gold);line-height:1;min-width:24px">${ti}.</div>
+          <input type="number" min="1" value="${ti}" data-reorder-id="${item.id}"
+            style="width:44px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--gold);background:transparent;border:1px solid var(--border);border-radius:6px;padding:2px 4px"
+            title="Type a number then click ↕ Reorder to apply"/>
           ${d?`<div style="font-weight:600;font-size:13px;f1:1;min-width:0">${esc(d.name)} <span class="badge" style="background:${cc}22;color:${cc};font-size:10px">${d.category}</span></div>`:
           `<input value="${esc(item.customName||'')}" placeholder="Activity name" style="flex:1;font-size:13px" onchange="updPI('${item.id}','customName',this.value)"/>`}
           ${tstr}
@@ -1239,6 +1241,31 @@ function showPlanEditor(isNew){
       </div>
     </div>`,true);
   setTimeout(()=>rDPick(),50);
+}
+function reorderPlanItems(){
+  if(!EP)return;
+  // Read all number inputs with data-reorder-id and sort items by their typed number
+  const inputs=[...document.querySelectorAll('[data-reorder-id]')];
+  if(!inputs.length)return;
+  // Build map of id → typed order number
+  const orderMap={};
+  inputs.forEach(inp=>{
+    const id=inp.dataset.reorderId;
+    const num=parseInt(inp.value)||999;
+    orderMap[id]=num;
+  });
+  // Sort EP.items by the typed number, keeping items not in orderMap at end
+  EP.items.sort((a,b)=>{
+    const an=orderMap[a.id]??orderMap[a.blockId]??999;
+    const bn=orderMap[b.id]??orderMap[b.blockId]??999;
+    return an-bn;
+  });
+  syncEP();
+  rPE(!DB.plans.find(p=>p.id===EP.id));
+  // Flash feedback
+  const btn=document.querySelector('[onclick="reorderPlanItems()"]');
+  if(btn){btn.textContent='✓ Reordered!';btn.style.background='var(--green)';btn.style.color='#000';
+    setTimeout(()=>{btn.textContent='↕ Reorder';btn.style.background='';btn.style.color='';},1500);}
 }
 function syncEP(){
   if(!EP)return;
@@ -1499,6 +1526,7 @@ function viewPlan(id){
       <div class="f1"></div>
       <button class="btn btn-dim btn-sm" onclick="copyPlanLink('${id}')">🔗 Copy Link</button>
       <button class="btn btn-dim btn-sm" onclick="emailPlan('${id}')">✉ Email</button>
+      <button class="btn btn-dim btn-sm" onclick="reorderPlanItems()">↕ Reorder</button>
       <button class="btn btn-blue btn-sm" onclick="dlCoachSheet('${id}')">📋 Coach Sheet</button>
       <button class="btn btn-gold btn-sm" onclick="dlPlan('${id}')">🖨 Download</button>
     </div>
