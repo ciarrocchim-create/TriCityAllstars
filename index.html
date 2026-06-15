@@ -351,7 +351,7 @@ const SEED_PLAYERS=[
   {name:'Amira Hassan',number:'99',positions:['C','P'],notes:'Requests Coach Mike C'},
   {name:'Bridget Walsh',number:'23',positions:['OF','1B'],notes:''},
   {name:'Emily St. Rock',number:'17',positions:['P','OF'],notes:''},
-  {name:'Anna Marie Roye',number:'4',positions:[],notes:''},
+  {name:'Annmarie Roye',number:'4',positions:[],notes:''},
   {name:'Aria Rivera',number:'6',positions:[],notes:''},
   {name:'Calli Brandon',number:'3',positions:[],notes:''},
   {name:'Hadley Dunfour',number:'11',positions:[],notes:''},
@@ -2681,21 +2681,6 @@ function showGameModal(isNew){
           return (c.subPlayerId?c.subPosition:c.position)||'';
         });
         const totalBenchInnings=playerPosArr.filter(p=>p==='BN').length;
-        // Compute consecutive streak for each inning
-        // streak[i] = {playStreak, benchStreak} ending AT inning i
-        const streaks=playerPosArr.map((pos,i)=>{
-          const isPlaying=pos&&pos!=='BN';
-          const isBench=pos==='BN';
-          const isUnset=!pos;
-          let playStreak=0,benchStreak=0;
-          if(isPlaying){
-            for(let j=i;j>=0;j--){const p=playerPosArr[j];if(p&&p!=='BN')playStreak++;else break;}
-          }
-          if(isBench){
-            for(let j=i;j>=0;j--){if(playerPosArr[j]==='BN')benchStreak++;else break;}
-          }
-          return{playStreak,benchStreak};
-        });
 
         const regularCells=Array.from({length:numInnings},(_,inn)=>{
           const inningData=EG.inningGrid[inn+1]||{};
@@ -2706,24 +2691,13 @@ function showGameModal(isNew){
           const isConflict=curPos&&curPos!=='BN'&&conflictMap[inn+1]?.has(curPos);
           const isBench=curPos==='BN';
           const isPlaying=curPos&&!isBench;
-          const {playStreak,benchStreak}=streaks[inn];
 
-          // Consecutive warnings override normal coloring
+          // Simple coloring — conflicts, playing, bench, unassigned
           let cellBg,cellBorder,streakLabel='';
           if(isConflict){
             cellBg='var(--red)33';cellBorder='var(--red)';
-          } else if(isPlaying&&playStreak>=4){
-            cellBg='rgba(241,107,107,.28)';cellBorder='var(--red)';streakLabel=`<div style="font-size:9px;color:var(--red);font-weight:700">${playStreak} in a row</div>`;
-          } else if(isPlaying&&playStreak>=3){
-            cellBg='rgba(240,165,0,.22)';cellBorder='var(--gold)';streakLabel=`<div style="font-size:9px;color:var(--gold);font-weight:700">${playStreak} in a row</div>`;
-          } else if(isBench&&benchStreak>=3){
-            cellBg='rgba(241,107,107,.22)';cellBorder='var(--red)';streakLabel=`<div style="font-size:9px;color:var(--red);font-weight:700">${benchStreak} bench row</div>`;
-          } else if(isBench&&benchStreak>=2){
-            cellBg='rgba(240,165,0,.18)';cellBorder='var(--gold)';streakLabel=`<div style="font-size:9px;color:var(--gold);font-weight:700">${benchStreak} bench row</div>`;
           } else if(isPlaying){
             cellBg='var(--green)18';cellBorder='var(--green)44';
-          } else if(isBench&&totalBenchInnings>2){
-            cellBg='rgba(241,107,107,.18)';cellBorder='var(--red)44';streakLabel=`<div style="font-size:9px;color:var(--red);font-weight:700">${totalBenchInnings} bench total</div>`;
           } else if(isBench){
             cellBg='var(--dim)';cellBorder='var(--border)';
           } else {
@@ -2753,51 +2727,27 @@ function showGameModal(isNew){
           </td>`;
         }).join('');
 
-        const winPos=(EG.altGrid.winning[ent.playerId]||{}).position||'';
-        // Build win big conflict map once per row (check if winPos used by another active player)
-        const winConflict=winPos&&winPos!=='BN'&&Object.entries(EG.altGrid.winning||{}).some(([pid,c])=>pid!==ent.playerId&&activePids.has(pid)&&(c.position||'')=== winPos);
-        const winBg=winConflict?'var(--red)33':winPos&&winPos!=='BN'?'var(--green)22':winPos==='BN'?'var(--dim)':'var(--surface)';
-        const winBorder=winConflict?'var(--red)':winPos&&winPos!=='BN'?'var(--green)':'var(--border)';
-        const altCells=`<td style="width:8px;background:var(--navy)"></td>
-          <td style="padding:3px 2px;text-align:center;background:var(--green)06;border-left:3px solid var(--green)44;vertical-align:top">
-            <select style="width:72px;font-size:11px;text-align:center;background:${winBg};border-color:${winBorder}"
-              onchange="updAltGrid('winning','${ent.playerId}',this.value)">
-              ${posOpts.replace(`value="${winPos}"`,`value="${winPos}" selected`)}
-            </select>
-            ${winConflict?`<div style="font-size:9px;color:var(--red);font-weight:700">⚠ conflict</div>`:''}
-          </td>
-`;
-
         const spotBadge=ent.battingSpot?`<span style="color:var(--gold);font-weight:800;font-size:13px;min-width:18px;display:inline-block">${ent.battingSpot}.</span>`:`<span style="color:var(--dim);font-size:11px">—</span>`;
         return `<tr style="border-bottom:1px solid var(--border)">
           <td style="padding:6px 8px;white-space:nowrap;font-size:12px;font-weight:600;min-width:110px">
             ${spotBadge} ${esc(p.name.split(' ')[0])} <span style="color:var(--muted);font-size:10px">#${esc(p.number||'')}</span>
-            ${totalBenchInnings>0?`<span style="display:inline-block;margin-left:4px;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;background:${totalBenchInnings>2?'var(--red)33':totalBenchInnings>0?'var(--gold)22':'var(--dim)'};color:${totalBenchInnings>2?'var(--red)':totalBenchInnings>0?'var(--gold)':'var(--muted)'}">BN:${totalBenchInnings}</span>`:''}
+            ${totalBenchInnings>0?`<span style="display:inline-block;margin-left:4px;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;background:var(--gold)22;color:var(--gold)">BN:${totalBenchInnings}</span>`:''}
           </td>
-          ${regularCells}${altCells}
+          ${regularCells}
         </tr>`;
       }).join('');
       // Row for out-for-game players
       const outRow=EG.lineup.filter(e=>e.outForGame).map(e=>{const p=getPlayer(e.playerId);return p?`<span class="badge" style="background:var(--red)22;color:var(--red)">OUT: ${esc(p.name.split(' ')[0])}</span>`:''}).join(' ');
 
       // Copy inning button row
-      const copyBtns=Array.from({length:numInnings},(_,inn)=>inn===0?'<td></td>':`<td style="text-align:center;padding:2px 2px"><button class="btn btn-dim btn-xs" onclick="copyInning(${inn})" title="Copy Inn ${inn}">↙${inn}</button></td>`).join('')
-        +'<td style="width:8px"></td><td></td><td></td>';
+      const copyBtns='<td></td>'+Array.from({length:numInnings},(_,inn)=>inn===0?'<td></td>':`<td style="text-align:center;padding:2px 2px"><button class="btn btn-dim btn-xs" onclick="copyInning(${inn})" title="Copy Inn ${inn}">↙${inn}</button></td>`).join('');
 
       const clearBtns='<td style="padding:2px 6px;font-size:9px;color:var(--muted);font-weight:700;white-space:nowrap">✕ clear:</td>'
         +Array.from({length:numInnings},(_,inn)=>
           `<td style="text-align:center;padding:2px 2px"><button class="btn btn-xs" style="background:var(--red)18;color:var(--red);border:1px solid var(--red)33;padding:2px 6px;font-size:9px;border-radius:4px;cursor:pointer" onclick="clearInning(${inn+1})">Inn ${inn+1}</button></td>`
-        ).join('') + '<td style="width:8px"></td><td></td><td></td>';
+        ).join('');
 
       const anyConflict=Object.values(conflictMap).some(s=>s.size>0);
-      // Check Win Big column for conflicts
-      const winPosCounts={};
-      Object.entries(EG.altGrid?.winning||{}).forEach(([pid,c])=>{
-        if(!activePids.has(pid))return;
-        const pos=c.position||'';
-        if(pos&&pos!=='BN')winPosCounts[pos]=(winPosCounts[pos]||0)+1;
-      });
-      const anyWinConflict=Object.values(winPosCounts).some(c=>c>1);
 
       // Build "missing positions" footer row per inning
       const FIELD_POS=['P','C','1B','2B','3B','SS','LF','CF','RF','FLEX'];
@@ -2814,22 +2764,14 @@ function showGameModal(isNew){
             : missing.map(p=>`<span style="display:inline-block;background:var(--red)22;color:var(--red);border-radius:4px;padding:1px 5px;font-size:10px;font-weight:700;margin:1px">${p}</span>`).join('')
           }
         </td>`;
-      }).join('') + '<td style="width:8px"></td>'
-      + (()=>{
-          const wf=new Set(Object.values(EG.altGrid?.winning||{}).map(c=>c.position||'').filter(p=>p&&p!=='BN'));
-          const wm=FIELD_POS.filter(p=>!wf.has(p));
-          return `<td style="padding:4px 2px;text-align:center;vertical-align:top;background:${wm.length===0?'var(--green)0a':'var(--red)0a'};border-left:3px solid var(--green)44">${wm.length===0?'<span style="color:var(--green);font-size:11px;font-weight:700">✓ Full</span>':wm.map(p=>`<span style="display:inline-block;background:var(--red)22;color:var(--red);border-radius:4px;padding:1px 5px;font-size:10px;font-weight:700;margin:1px">${p}</span>`).join('')}</td>`;
-        })()
-;
+      }).join('');
 
       body=`<div style="overflow-x:auto">
         ${anyConflict?'<div style="background:var(--red)18;border:1px solid var(--red)44;border-radius:8px;padding:8px 12px;font-size:12px;color:var(--red);margin-bottom:8px">⚠ Position conflicts in regular innings — same position assigned to two players in the same inning</div>':''}
-        ${anyWinConflict?'<div style="background:var(--red)18;border:1px solid var(--red)44;border-radius:8px;padding:8px 12px;font-size:12px;color:var(--red);margin-bottom:8px">⚠ Position conflict in 🏆 Win Big lineup</div>':''}
         <div style="font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;gap:12px;flex-wrap:wrap">
           <span>🟢 Playing</span>
-          <span>🟡 2 in a row (play or bench)</span>
-          <span>🔴 3+ in a row (play or bench) or conflict</span>
-          <span style="color:var(--border)">⬜ Unassigned</span>
+          <span style="color:var(--border)">⬜ Bench / Unassigned</span>
+          <span>🔴 Conflict (same position twice)</span>
           <span>"sub ▾" to substitute</span>
         </div>
         <table style="border-collapse:collapse;width:100%">
@@ -2839,7 +2781,7 @@ function showGameModal(isNew){
             <tr style="background:var(--red)0a">${clearBtns}</tr>
           </thead>
           <tbody>${gridRows}
-          ${outRow?`<tr><td colspan="${numInnings+4}" style="padding:8px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)">Not playing: ${outRow}</td></tr>`:''}
+          ${outRow?`<tr><td colspan="${numInnings+1}" style="padding:8px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)">Not playing: ${outRow}</td></tr>`:''}
           </tbody>
           <tfoot>
             <tr style="border-top:2px solid var(--border)">
@@ -3163,9 +3105,7 @@ function printLineupCard(){
   const allPos=[...FIELD_POS,'DP','FLEX','EH','BN'];
 
   // Build inning column headers
-  const innHeaders=Array.from({length:numInnings},(_,i)=>`<th style="text-align:center;padding:6px 8px;background:#1a1a2e;color:#f0a500;font-size:13px;min-width:80px">Inn ${i+1}</th>`).join('')
-    + '<th style="width:6px;background:#0a0a0a"></th>'
-    + '<th style="text-align:center;padding:6px 8px;background:#0d2b0d;color:#2a9d5c;font-size:12px;min-width:80px;border-left:3px solid #2a9d5c">🏆 Win Big</th>';
+  const innHeaders=Array.from({length:numInnings},(_,i)=>`<th style="text-align:center;padding:6px 8px;background:#1a1a2e;color:#f0a500;font-size:13px;min-width:80px">Inn ${i+1}</th>`).join('');
 
   // Build rows — one per player in batting order
   const playerRows=active.map(ent=>{
@@ -3185,18 +3125,12 @@ function printLineupCard(){
         ${subP?`<br/><span style="font-size:9px;color:#7744aa">${esc(subP.name.split(' ')[0])}</span>`:''}
       </td>`;
     }).join('');
-    const winPos=(EG.altGrid?.winning[ent.playerId]||{}).position||'';
-    const losePos=(EG.altGrid?.losing[ent.playerId]||{}).position||'';
-    const winBench=winPos==='BN'||!winPos;
-    const loseBench=losePos==='BN'||!losePos;
     return `<tr>
       <td style="padding:5px 10px;border:1px solid #ddd;background:#f9f9f9;font-weight:700;font-size:12px;white-space:nowrap">
         <span style="color:#f0a500;font-weight:900;margin-right:6px">${ent.battingSpot||'—'}.</span>${esc(p.name)}
       </td>
       <td style="padding:5px 8px;border:1px solid #ddd;text-align:center;font-size:11px;color:#888">#${esc(p.number||'—')}</td>
       ${cells}
-      <td style="width:6px;background:#eee;border:none"></td>
-      <td style="text-align:center;padding:5px 4px;border:1px solid #c8e6c8;background:${winBench?'#ffeeee':'#efffef'};font-size:12px;font-weight:700;color:${winBench?'#cc3333':'#1a6b2e'}">${winPos||'—'}</td>
     </tr>`;
   }).join('');
 
@@ -3208,21 +3142,7 @@ function printLineupCard(){
       ${missing.length===0?'<span style="color:#1a6b2e;font-weight:700">✓ Full</span>':
         missing.map(p=>`<span style="background:#ffdddd;color:#cc3333;border-radius:3px;padding:1px 4px;margin:1px;display:inline-block;font-weight:700">${p}</span>`).join('')}
     </td>`;
-  }).join('') + '<td style="width:6px;background:#eee;border:none"></td>'
-    + (()=>{
-        const winFilled=new Set(Object.values(EG.altGrid?.winning||{}).map(c=>c.position||'').filter(p=>p&&p!=='BN'));
-        const winMissing=FIELD_POS.filter(p=>!winFilled.has(p));
-        return `<td style="padding:4px;text-align:center;border:1px solid #c8e6c8;background:#f0fff0;font-size:10px">${winMissing.length===0?'<span style="color:#1a6b2e;font-weight:700">✓ Full</span>':winMissing.map(p=>`<span style="background:#ffdddd;color:#cc3333;border-radius:3px;padding:1px 4px;margin:1px;display:inline-block;font-weight:700">${p}</span>`).join('')}</td>`;
-      })();
-
-  // Alt lineups summary (now embedded in main table, separate table below is removed)
-  const winRow=active.map(ent=>{
-    const pos=(EG.altGrid?.winning[ent.playerId]||{}).position||'';
-    const p=getPlayer(ent.playerId);
-    const isBench=pos==='BN'||!pos;
-    return `<td style="text-align:center;padding:4px;border:1px solid #ddd;background:${isBench?'#ffeeee':'#efffef'};font-size:11px;font-weight:700;color:${isBench?'#cc3333':'#1a6b2e'}">${pos||'—'}</td>`;
   }).join('');
-
 
   // Out for game
   const outPlayers=EG.lineup.filter(e=>e.outForGame).map(e=>{const p=getPlayer(e.playerId);return p?esc(p.name):''}).filter(Boolean).join(', ');
