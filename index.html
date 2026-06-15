@@ -336,7 +336,7 @@ const BUILD_TIME=(()=>{
     return d.toLocaleString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'});
   }catch(e){return'Unknown';}
 })();
-const POSITIONS=['P','C','1B','2B','3B','SS','LF','CF','RF','DP','FLEX','EH'];
+const POSITIONS=['P','C','1B','2B','3B','SS','LF','CF','RF','DP','EH'];
 const DRILL_CATS=['Hitting','Pitching','Fielding','Catching','Baserunning','Conditioning','Other'];
 const DRILL_TYPES=['Drill','Tip','Warmup','Progression'];
 const TYPE_COLOR={'Drill':'#5b8af5','Tip':'#c97af5','Warmup':'#3ddc84','Progression':'#f5a05b'};
@@ -2375,7 +2375,6 @@ function showFieldView(inning){
     'LF': {x:110,y:110,label:'LF'},
     'CF': {x:240,y:70,label:'CF'},
     'RF': {x:365,y:110,label:'RF'},
-    'FLEX':{x:420,y:360,label:'FLEX'},
     'DP': {x:60,y:360,label:'DP'},
     'EH': {x:420,y:200,label:'EH'},
   };
@@ -2750,7 +2749,7 @@ function showGameModal(isNew){
       const anyConflict=Object.values(conflictMap).some(s=>s.size>0);
 
       // Build "missing positions" footer row per inning
-      const FIELD_POS=['P','C','1B','2B','3B','SS','LF','CF','RF','FLEX'];
+      const FIELD_POS=['P','C','1B','2B','3B','SS','LF','CF','RF'];
       const missingRows=Array.from({length:numInnings},(_,inn)=>{
         const inningData=EG.inningGrid[inn+1]||{};
         const filled=new Set(Object.entries(inningData)
@@ -3082,7 +3081,7 @@ function onBODrop(e,targetPid){
 function printLineupCard(){
   if(!EG)return;
   const numInnings=EG.innings||6;
-  const FIELD_POS=['P','C','1B','2B','3B','SS','LF','CF','RF','FLEX'];
+  const FIELD_POS=['P','C','1B','2B','3B','SS','LF','CF','RF'];
 
   // Build per-inning position map: {inn: {pos: playerName}} 
   // inningGrid is keyed by playerId: {inn:{pid:{position,...}}}
@@ -3102,7 +3101,7 @@ function printLineupCard(){
 
   // All active players sorted by batting order
   const active=EG.lineup.filter(e=>!e.outForGame).sort((a,b)=>(a.battingSpot||99)-(b.battingSpot||99));
-  const allPos=[...FIELD_POS,'DP','FLEX','EH','BN'];
+  const allPos=[...FIELD_POS,'DP','EH','BN'];
 
   // Build inning column headers
   const innHeaders=Array.from({length:numInnings},(_,i)=>`<th style="text-align:center;padding:6px 8px;background:#1a1a2e;color:#f0a500;font-size:13px;min-width:80px">Inn ${i+1}</th>`).join('');
@@ -3198,7 +3197,7 @@ ${outPlayers?`<div style="font-size:11px;color:#888;margin-top:8px">Not playing:
 
 ${(()=>{
   // Field coords scaled to 240x220 viewBox
-  const PC={'P':{x:120,y:124},'C':{x:120,y:172},'1B':{x:165,y:132},'2B':{x:137,y:97},'3B':{x:75,y:132},'SS':{x:102,y:102},'LF':{x:55,y:55},'CF':{x:120,y:35},'RF':{x:182,y:55},'FLEX':{x:205,y:175},'DP':{x:30,y:175},'EH':{x:210,y:100}};
+  const PC={'P':{x:120,y:124},'C':{x:120,y:172},'1B':{x:165,y:132},'2B':{x:137,y:97},'3B':{x:75,y:132},'SS':{x:102,y:102},'LF':{x:55,y:55},'CF':{x:120,y:35},'RF':{x:182,y:55},'DP':{x:30,y:175},'EH':{x:210,y:100}};
   const BASE_SVG=`<path d="M15,195 Q120,10 225,195 Z" fill="#1a3a1a"/><path d="M120,170 L165,132 L120,95 L75,132 Z" fill="#3d2a1a"/><line x1="120" y1="170" x2="165" y2="132" stroke="#5a3d1f" stroke-width="1.5"/><line x1="165" y1="132" x2="120" y2="95" stroke="#5a3d1f" stroke-width="1.5"/><line x1="120" y1="95" x2="75" y2="132" stroke="#5a3d1f" stroke-width="1.5"/><line x1="75" y1="132" x2="120" y2="170" stroke="#5a3d1f" stroke-width="1.5"/><line x1="120" y1="170" x2="15" y2="15" stroke="#fff" stroke-width=".5" opacity=".3"/><line x1="120" y1="170" x2="225" y2="15" stroke="#fff" stroke-width=".5" opacity=".3"/><circle cx="120" cy="124" r="9" fill="#4a3520"/><rect x="113" y="163" width="14" height="14" rx="2" fill="#e8e0d0"/><rect x="158" y="125" width="14" height="14" rx="2" fill="#e8e0d0"/><rect x="113" y="88" width="14" height="14" rx="2" fill="#e8e0d0"/><rect x="68" y="125" width="14" height="14" rx="2" fill="#e8e0d0"/>`;
   const diagrams=Array.from({length:numInnings},(_,i)=>{
     const inn=i+1;
@@ -3294,7 +3293,7 @@ function saveGame(isNew){if(!EG)return;
 }
 function delGame(id){DB.games=DB.games.filter(g=>g.id!==id);scheduleSave();renderTab();updateCounts();}
 function showPT(){
-  const ALL_POS=['P','C','1B','2B','3B','SS','LF','CF','RF','FLEX','DP','EH'];
+  const ALL_POS=['P','C','1B','2B','3B','SS','LF','CF','RF','DP','EH'];
   // Only include completed games (have a result OR have inningsPlayed > 0 for any player)
   // Completed = explicitly marked as played OR has a result set
   const completedGames=DB.games.filter(g=>g.played||(g.result==='W'||g.result==='L'||g.result==='T'));
